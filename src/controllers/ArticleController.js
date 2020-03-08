@@ -9,6 +9,15 @@ const {
 exports.all = async () => await Article.all()
 exports.find = async (root, { id }) => await Article.find({ id })
 
+exports.feed = async (root, { cursor }) => {
+  if (!cursor) throw new ApolloError('Missing cursor')
+
+  return {
+    messages: [],
+    cursor: 'hi',
+  }
+}
+
 exports.create = async (root, { url, title }, { user }) => {
   if (!user) throw new ForbiddenError()
   const response = await Article.create({ url, title, userId: user.id }).catch(

@@ -20,7 +20,9 @@ const resolvers = {
 
   Query: {
     articles: ArticleController.all,
+    // articleFeed: ArticleController.feed,
     article: ArticleController.find,
+
     user: UserController.find,
     // users: UserController.all,
     comment: CommentController.find,

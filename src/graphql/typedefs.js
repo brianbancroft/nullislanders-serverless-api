@@ -21,6 +21,11 @@ const typeDefs = gql`
     user: User
   }
 
+  # type ArticleFeed {
+  #   cursor: String!
+  #   messages: [Message]!
+  # }
+
   type Comment {
     id: ID
     text: String
@@ -40,6 +45,7 @@ const typeDefs = gql`
 
     article(id: ID!): Article
     articles: [Article]
+    articleFeed: (cursor: String!): ArticleFeed
     user(id: ID!): User
     users: [User]
     comment(id: ID!): Comment
