@@ -40,33 +40,34 @@ exports.all = async () => {
 exports.page = async ({ limit, offset }) => {
   const query = {
     text: `
-      WITH article_vote_tallies AS (
+        WITH article_vote_tallies AS (
+          SELECT
+            article_id,
+            SUM(value) AS votes
+          FROM article_votes
+          GROUP BY article_id
+        )
+
         SELECT
-          article_id,
-          SUM(value) AS votes
-        FROM article_votes
-        GROUP BY article_id
-      )
+          article.id AS id,
+          article.url AS url,
+          article.title AS title,
+          COALESCE(votes.votes, 0) AS votes,
+          article.user_id AS user_id,
+          users.name AS name,
+          article.user_id AS user_id,
+          article.created_at AS created_at
 
-      SELECT
-        article.id AS id,
-        article.url AS url,
-        article.title AS title,
-        COALESCE(votes.votes, 0) AS votes,
-        article.user_id AS user_id,
-        users.name AS name,
-        article.user_id AS user_id,
-        article.created_at AS created_at
+        FROM articles AS article
+        LEFT JOIN article_vote_tallies AS votes
+          ON article.id = votes.article_id
+        LEFT JOIN users
+          ON article.user_id = users.id
 
-      FROM articles AS article
-      LEFT JOIN article_vote_tallies AS votes
-        ON article.id = votes.article_id
-      LEFT JOIN users
-        ON article.user_id = users.id
+        ORDER BY article.created_at DESC, article.id DESC
+          LIMIT $1
+          OFFSET $2;
 
-        LIMIT $1
-        OFFSET $2
-      ;
     `,
     values: [limit, offset],
   }
@@ -76,6 +77,16 @@ exports.page = async ({ limit, offset }) => {
   })
 
   return convertArrayObjectKeysToCamelCase(rows)
+}
+
+exports.count = async () => {
+  const { rows } = await client
+    .query('SELECT COUNT(*) AS count FROM articles;')
+    .catch(e => {
+      throw new Error(e)
+    })
+
+  return rows[0].count
 }
 
 exports.find = async ({ id }) => {

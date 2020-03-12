@@ -23,6 +23,7 @@ const typeDefs = gql`
 
   type ArticleFeed {
     cursor: Int!
+    numberPages: Int!
     articles: [Article]!
   }
 

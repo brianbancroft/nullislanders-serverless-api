@@ -9,10 +9,16 @@ const {
 exports.all = async () => await Article.all()
 exports.find = async (root, { id }) => await Article.find({ id })
 
-exports.feed = async (root, { limit, offset = 0 }) => ({
-  articles: await Article.page({ limit, offset }),
-  cursor: offset + limit,
-})
+exports.feed = async (root, { limit, offset = 0 }) => {
+  const numberPages = (await Article.count()) / limit
+  const articles = await Article.page({ limit, offset })
+
+  return {
+    articles,
+    numberPages,
+    cursor: offset + limit,
+  }
+}
 
 exports.create = async (root, { url, title }, { user }) => {
   if (!user) throw new ForbiddenError()
